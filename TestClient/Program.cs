@@ -41,6 +41,7 @@ class Program
                     
                     Console.WriteLine("Автотесты завершены. Введите сообщение ('exit' - завершение):");
 
+                    //Ручное тестирование
                     bool skipRead = false;
                     while (true)
                     {
@@ -50,7 +51,7 @@ class Program
                         SendMessage(stream, userInput);
                         if (string.IsNullOrWhiteSpace(userInput.TrimEnd('\n')) && userInput?.Contains("\n") == true)
                         {
-                            Console.WriteLine("Пустое или пробельное сообщение с \\n, игнорируется...");
+                            Console.WriteLine("Пустое или пробельное сообщение игнорируется...");
                             skipRead = true;
                         }
                         else if (string.IsNullOrWhiteSpace(userInput) && !userInput?.Contains("\n") == true)

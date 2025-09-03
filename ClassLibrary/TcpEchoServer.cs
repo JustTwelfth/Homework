@@ -26,7 +26,7 @@ namespace ClassLibrary
         private Encoding utf8Strict = Encoding.GetEncoding("utf-8", new EncoderReplacementFallback(""), new DecoderExceptionFallback());
         public event Action<string> LogEvent;
 
-        public void Start()
+        public void Start() // Запуск сервера
         {
             listener = new TcpListener(IPAddress.Any, Port);
             listener.Start();
@@ -35,7 +35,7 @@ namespace ClassLibrary
             acceptThread.Start();
         }
 
-        public void Stop()
+        public void Stop() // Остановка сервера
         {
             listener?.Stop();
             currentClient?.Close();
@@ -55,13 +55,12 @@ namespace ClassLibrary
             LogEvent?.Invoke("Сервер остановлен");
         }
 
-        private void AcceptLoop()
+        private void AcceptLoop() //Поток принятия соединений
         {
             while (true)
             {
                 try
                 {
-                    ManualResetEvent acceptEvent = new ManualResetEvent(false);
                     if (stopEvent.WaitOne(0)) break;
                     var newClient = listener.AcceptTcpClient();
                     if (currentClient != null && currentClient.Connected)
@@ -84,7 +83,7 @@ namespace ClassLibrary
             }
         }
 
-        private void ReceiveLoop()
+        private void ReceiveLoop() //Поток приема сообщений
         {
             byte[] readBuffer = new byte[16384];
             while (true)
@@ -172,7 +171,7 @@ namespace ClassLibrary
             LogEvent?.Invoke("Клиент отключен");
         }
 
-        private void ProcessLoop()
+        private void ProcessLoop() //Поток обработки и отправки
         {
             while (isRunning)
             {
