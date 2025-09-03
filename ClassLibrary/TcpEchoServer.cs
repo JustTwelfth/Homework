@@ -71,6 +71,7 @@ namespace ClassLibrary
                     else
                     {
                         currentClient = newClient;
+                        dataBuffer.Clear();
                         stream = currentClient.GetStream();
                         LogEvent?.Invoke("Клиент подключен");
                         receiveThread = new Thread(ReceiveLoop);
@@ -161,13 +162,26 @@ namespace ClassLibrary
                     break;
                 }
             }
-            queueAccess.WaitOne();
             try
             {
+                queueAccess.WaitOne();
                 messageQueue.Clear();
             }
-            finally { queueAccess.Set(); }
+            finally
+            {
+                queueAccess.Set();
+            }
             messageEvent.Set();
+            if (currentClient != null)
+            {
+                try
+                {
+                    currentClient.Close();
+                }
+                catch { } 
+                currentClient = null;
+            }
+            stream = null;
             LogEvent?.Invoke("Клиент отключен");
         }
 
@@ -178,6 +192,19 @@ namespace ClassLibrary
                 WaitHandle[] handles = { messageEvent, stopEvent };
                 int index = WaitHandle.WaitAny(handles);
                 if (index == 1) break;
+                if (!currentClient?.Connected ?? true)
+                {
+                    try
+                    {
+                        queueAccess.WaitOne();
+                        messageQueue.Clear();
+                    }
+                    finally
+                    {
+                        queueAccess.Set();
+                    }
+                    continue;
+                }
                 while (true)
                 {
                     string msg = null;

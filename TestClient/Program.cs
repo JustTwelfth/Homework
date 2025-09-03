@@ -80,7 +80,6 @@ class Program
         {
             Console.WriteLine("Error: " + ex.Message);
         }
-        Console.ReadLine();
     }
 
     static void SendAndReceive(NetworkStream stream, string msg, string logMessage, bool fragmented = false, bool skipRead = false)
